@@ -221,7 +221,17 @@ loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js', f
       }
       window._visits.sort(function(a, b){ return (b.id || 0) - (a.id || 0); });
       window._dataReady = true;
-      window.dispatchEvent(new CustomEvent('visitsUpdated'));
+      // Directly call renderHistory - retry until it's available
+      var attempts = 0;
+      function tryRender() {
+        if (window.renderHistory && typeof window.renderHistory === 'function') {
+          window.renderHistory();
+        } else if (attempts < 50) {
+          attempts++;
+          setTimeout(tryRender, 200);
+        }
+      }
+      setTimeout(tryRender, 500);
     });
 
   });
@@ -247,9 +257,8 @@ const FRI=[
 
 window._visits = [];
 window._dataReady = false;
-window.addEventListener('visitsUpdated', function() {
-  renderHistory();
-});
+// Expose renderHistory globally so Firebase callback can call it
+window.renderHistory = null;
 let checked={};
 let photos=[];
 let modalIdx=null;
@@ -381,6 +390,8 @@ function renderHistory(){
     card.innerHTML=h;el.appendChild(card);
   });
 }
+
+window.renderHistory = renderHistory;
 
 function openModal(idx){
   modalIdx=idx;
