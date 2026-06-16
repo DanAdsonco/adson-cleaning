@@ -199,8 +199,17 @@ window._fbSave = function(visits) {
 
 onValue(visitsRef, (snapshot) => {
   const data = snapshot.val();
-  window._visits = data ? data : [];
-  if (typeof renderHistory === 'function' && document.getElementById('pg-history').classList.contains('on')) {
+  if (data === null) {
+    window._visits = [];
+  } else if (Array.isArray(data)) {
+    window._visits = data.filter(v => v !== null);
+  } else if (typeof data === 'object') {
+    window._visits = Object.values(data).filter(v => v !== null);
+  } else {
+    window._visits = [];
+  }
+  window._visits.sort((a, b) => (b.id || 0) - (a.id || 0));
+  if (typeof renderHistory === 'function') {
     renderHistory();
   }
 });
