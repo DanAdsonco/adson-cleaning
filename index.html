@@ -197,7 +197,10 @@ loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js', f
     window._fbSave = function(visits) {
       var bar = document.getElementById('sync-bar');
       if(bar) bar.style.display = 'block';
-      visitsRef.set(visits).then(function() {
+      // Convert array to object with id as key to prevent overwrites
+      var data = {};
+      visits.forEach(function(v) { if(v && v.id) data[v.id] = v; });
+      visitsRef.set(data).then(function() {
         if(bar) bar.style.display = 'none';
       }).catch(function(e) {
         if(bar) bar.style.display = 'none';
