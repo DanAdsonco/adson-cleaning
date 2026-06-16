@@ -209,9 +209,9 @@ onValue(visitsRef, (snapshot) => {
     window._visits = [];
   }
   window._visits.sort((a, b) => (b.id || 0) - (a.id || 0));
-  if (typeof renderHistory === 'function') {
-    renderHistory();
-  }
+  window._dataReady = true;
+  // Dispatch event so the main script can react
+  window.dispatchEvent(new CustomEvent('visitsUpdated'));
 });
 </script>
 
@@ -233,6 +233,10 @@ const FRI=[
 ];
 
 window._visits = [];
+window._dataReady = false;
+window.addEventListener('visitsUpdated', function() {
+  renderHistory();
+});
 let checked={};
 let photos=[];
 let modalIdx=null;
